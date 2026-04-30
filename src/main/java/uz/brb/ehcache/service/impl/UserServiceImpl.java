@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.brb.ehcache.dto.ShortDto;
 import uz.brb.ehcache.dto.response.Response;
 import uz.brb.ehcache.dto.response.UserResponse;
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final EntityManager entityManager;
 
     @Override
+    @Transactional(readOnly = true)
     public Response<?> get(Long id) {
         AuthUser authUser = authUserRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AuthUser not found: " + id));
@@ -52,6 +54,7 @@ public class UserServiceImpl implements UserService {
             value = "users",
             key = "'page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize + ':sort:' + #pageable.sort.toString()")
     @Override
+    @Transactional(readOnly = true)
     public Response<?> getAll(Pageable pageable) {
         List<AuthUser> users = authUserRepository.findAll(pageable).getContent();
         return Response.builder()
@@ -80,6 +83,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Response<?> me(AuthUser user) {
         if (user == null) {
             return Response.builder()
@@ -101,6 +105,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Response<?> roleStatistics() {
         List<Tuple> roleStatistics = authUserRepository.roleStatistics();
         List<ShortDto> shortDtoList = new ArrayList<>();
@@ -123,6 +128,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Response<?> search(String fullName, String username) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<AuthUser> query = builder.createQuery(AuthUser.class);

@@ -5,6 +5,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.brb.ehcache.dto.response.Response;
 import uz.brb.ehcache.entity.ApiLog;
 import uz.brb.ehcache.repository.ApiLogRepository;
@@ -47,6 +48,7 @@ public class ApiLogServiceImpl implements ApiLogService {
             value = "apiLog-cache",
             key = "'page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize + ':sort:' + #pageable.sort.toString()")
     @Override
+    @Transactional(readOnly = true)
     public Response<?> getAll(Pageable pageable) {
         List<ApiLog> apiLogs = apiLogRepository.findAll(pageable).getContent();
         return Response.builder()
